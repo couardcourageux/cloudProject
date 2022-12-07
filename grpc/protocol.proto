@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package KVStore;
+
+
+service KvStore {
+    rpc obtainId(VoidMsg) returns (PayloadMsg) {}
+    rpc findNode(PayloadMsg) returns (PayloadMsg) {}
+
+
+}
+
+
+message VoidMsg {}
+
+message SimpleMsg {
+    int64 respStatus = 1;
+}
+
+message PayloadMsg {
+    int64 respStatus = 1;
+    string jsonData = 2;
+}
