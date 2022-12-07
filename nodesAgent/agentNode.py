@@ -19,8 +19,8 @@ class Agent:
     ip: str
     port: str
     rank: int = -1
-    capacity: int = 4000
     _hosting: str = ""
+    capacity: int = 4000
     
     
     ##########################
@@ -31,8 +31,8 @@ class Agent:
             dict["ip"], 
             dict["port"],
             dict["rank"], 
+            dict["_hosting"],
             dict["capacity"], 
-            dict["_hosting"]
         )
         return ag
     
@@ -44,7 +44,7 @@ class Agent:
     ##########################
     @classmethod
     def register(self, agent:'Agent') -> None:
-        AdressHolder.agents[agent.agent_id] = agent
+        AdressHolder.agents[agent.id] = agent
             
     @classmethod
     def get(self, agent_id:str) -> 'Agent':
