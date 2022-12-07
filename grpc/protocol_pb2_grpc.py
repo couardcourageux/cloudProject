@@ -14,6 +14,11 @@ class KvStoreStub(object):
         Args:
             channel: A grpc.Channel.
         """
+        self.ping = channel.unary_unary(
+                '/KVStore.KvStore/ping',
+                request_serializer=protocol__pb2.VoidMsg.SerializeToString,
+                response_deserializer=protocol__pb2.VoidMsg.FromString,
+                )
         self.obtainId = channel.unary_unary(
                 '/KVStore.KvStore/obtainId',
                 request_serializer=protocol__pb2.VoidMsg.SerializeToString,
@@ -28,6 +33,12 @@ class KvStoreStub(object):
 
 class KvStoreServicer(object):
     """Missing associated documentation comment in .proto file."""
+
+    def ping(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
     def obtainId(self, request, context):
         """Missing associated documentation comment in .proto file."""
@@ -44,6 +55,11 @@ class KvStoreServicer(object):
 
 def add_KvStoreServicer_to_server(servicer, server):
     rpc_method_handlers = {
+            'ping': grpc.unary_unary_rpc_method_handler(
+                    servicer.ping,
+                    request_deserializer=protocol__pb2.VoidMsg.FromString,
+                    response_serializer=protocol__pb2.VoidMsg.SerializeToString,
+            ),
             'obtainId': grpc.unary_unary_rpc_method_handler(
                     servicer.obtainId,
                     request_deserializer=protocol__pb2.VoidMsg.FromString,
@@ -63,6 +79,23 @@ def add_KvStoreServicer_to_server(servicer, server):
  # This class is part of an EXPERIMENTAL API.
 class KvStore(object):
     """Missing associated documentation comment in .proto file."""
+
+    @staticmethod
+    def ping(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/KVStore.KvStore/ping',
+            protocol__pb2.VoidMsg.SerializeToString,
+            protocol__pb2.VoidMsg.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
     def obtainId(request,

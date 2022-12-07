@@ -1,7 +1,7 @@
 import secrets
 import hashlib
 
-    
+from typing import Union
         
     
 class HashKey:
@@ -9,19 +9,27 @@ class HashKey:
         self.value = value
         self.hashValue = self.hash()
         
-    def setValue(self, newValue:str) -> None:
+    @classmethod
+    def getRandom(self) -> 'HashKey':
+        return HashKey(secrets.token_hex(256))
+    
+    def setValue(self, value: str, hashValue:str) -> None:
+        self.value = value
+        self.hashValue = hashValue
+        
+    def updateValue(self, newValue:str) -> None:
         self.value = newValue
         self.hashValue = self.hash()
         
     def hash(self):
         return hashlib.sha256(str.encode(self.value)).hexdigest()
     
-    def sumint(self, value:int | str | 'HashKey') -> str:
+    def sumint(self, value:Union[int, str, 'HashKey']) -> str:
         if isinstance(value, int):
             val = value
         elif isinstance(value, str):
             val = int(value, 16)
-        elif isinstance(value, 'HashKey'):
+        elif isinstance(value, HashKey):
             val = int(value.hashValue, 16)
         else:
             print(value)
@@ -30,12 +38,12 @@ class HashKey:
         res = (int(self.value, 16) + val) % pow(2, 256)
         return self.canonicalize(res)
     
-    def subint(self, value: int | str | 'HashKey') -> str:
+    def subint(self, value: Union[int, str, 'HashKey']) -> str:
         if isinstance(value, int):
             val = value
         elif isinstance(value, str):
             val = int(value, 16)
-        elif isinstance(value, 'HashKey'):
+        elif isinstance(value, HashKey):
             val = int(value.hashValue, 16)
         else:
             print(value)
@@ -90,7 +98,7 @@ class HashKey:
     
     
     def __repr__(self) -> str:
-        return self.value[:5] + ";" + self.hashValue[:10]
+        return self.value[:5] + ".. ; " + self.hashValue[:15] + ".."
     
     def __gt__(self, otherKey:'HashKey') -> bool:
         return self.hashValue > otherKey.hashValue
@@ -98,8 +106,11 @@ class HashKey:
     def __ge__(self, otherKey:'HashKey') -> bool:
         return self.hashValue >= otherKey.hashValue
     
-    def __eq__(self, otherKey:'HashKey') -> bool:
-        return self.hashValue == otherKey.hashValue
+    def __eq__(self, otherKey:Union[str, 'HashKey']) -> bool:
+        if isinstance(otherKey, str):
+            return self.hashValue == otherKey
+        elif isinstance(otherKey, HashKey):
+            return self.hashValue == otherKey.hashValue
     
     def __le__(self, otherKey:'HashKey') -> bool:
         return self.hashValue <= otherKey.hashValue
@@ -110,12 +121,12 @@ class HashKey:
     def __ne__(self, otherKey:'HashKey') -> bool:
         return self.hashValue != otherKey.hashValue
     
-    def __add__(self, value: 'HashKey' | int | str) -> str:
+    def __add__(self, value: Union[int, str, 'HashKey']) -> str:
         if isinstance(value, int):
             val = value
         elif isinstance(value, str):
             val = int(value, 16)
-        elif isinstance(value, 'HashKey'):
+        elif isinstance(value, HashKey):
             val = int(value.hashValue, 16)
         else:
             print(value)
@@ -123,12 +134,12 @@ class HashKey:
         
         return self.sumint(val)
     
-    def __sub__(self, value: 'HashKey' | int | str) -> str:
+    def __sub__(self, value: Union[int, str, 'HashKey']) -> str:
         if isinstance(value, int):
             val = value
         elif isinstance(value, str):
             val = int(value, 16)
-        elif isinstance(value, 'HashKey'):
+        elif isinstance(value, HashKey):
             val = int(value.hashValue, 16)
         else:
             print(value)
@@ -136,4 +147,7 @@ class HashKey:
         
         return self.subint(val)
     
+    
+if __name__ == '__main__':
+    pass
     

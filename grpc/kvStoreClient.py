@@ -9,6 +9,15 @@ import protocol_pb2_grpc
 class KvStoreClient():
     
     @classmethod
+    async def ping(self, distantAgentHost:str) -> None:
+        async with aio.insecure_channel(distantAgentHost) as ch:
+            stub = protocol_pb2_grpc.KvStoreStub(ch)
+            req = protocol_pb2.VoidMsg()
+            await stub.obtainId(req, timeout=5)
+            return 
+        
+    
+    @classmethod
     async def join_network(self, distantAgentHost:str) -> tuple:
         async with aio.insecure_channel(distantAgentHost) as ch:
             stub = protocol_pb2_grpc.KvStoreStub(ch)
@@ -34,3 +43,4 @@ class KvStoreClient():
             # return json.loads(response.jsonData)
             return {}
             #smth to do now
+            

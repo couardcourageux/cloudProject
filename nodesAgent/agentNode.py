@@ -4,6 +4,14 @@ from typing import List, Dict
 class AdressHolder:
     agents = {}
     nodes = {}
+    local_agent_id = ""
+    
+    @classmethod
+    def get_local_agent(self) -> str:
+        return self.local_agent_id
+    @classmethod
+    def set_local_agent(self, agent_id:str) -> None:
+        self.local_agent_id = agent_id
 
 @dataclass
 class Agent:
@@ -34,13 +42,26 @@ class Agent:
         Agent.register(ag)
         return ag.agent_id
     ##########################
+    @classmethod
+    def register(self, agent:'Agent') -> None:
+        AdressHolder.agents[agent.agent_id] = agent
+            
+    @classmethod
+    def get(self, agent_id:str) -> 'Agent':
+        return AdressHolder.agents.get(agent_id, None)
+    
+    @classmethod
+    def unlist(self, agent_id:str) -> None:
+        AdressHolder.agents.pop(agent_id, None)
+    #################################################
     
     def toDict(self) -> Dict:
         return asdict(self)
     
     def hosting(self):
-        if self._hosting != "":
-            return 
+        if self._hosting == "":
+            return None
+        return Node.get(self._hosting) 
     
     def show(self):
         print(f"agent: {self.id[:20]}, hosting node {Node.get(self._hosting).id[:20]}")
@@ -90,9 +111,13 @@ class Node:
         return dict
     
     def agents(self) -> Dict[str, 'Agent']:
-        output = {x: Agent.get(x) for x in self._agents}
+        sortedAgents = sorted(self.agents, key=lambda a: a.rank)
+        output = {x: Agent.get(x) for x in sortedAgents if x.rank >= 0}
         output = {k: v for k, v in output.items() if v is not None}
         return output
+    
+    def getAgentsIterator(self) -> 'NodeIteratorOverAgents':
+        return NodeIteratorOverAgents(self)
     
     def addAgent(self, agent_id: str) -> None:
         if not agent_id in self._agents:
@@ -105,4 +130,18 @@ class Node:
     def clearAgents(self) -> None:
         self._agents.clear()
     
+class NodeIteratorOverAgents:
+    def __init__(self, node:Node) -> None:
+        self.agents = list(node.agents())
+        self.current = 0
+        self.limit = len(self.agents) 
+        
+    def hasNext(self) -> bool:
+        return self.current < self.limit
+        
+    def next(self) -> Agent:
+        if self.hasNext():
+            ag = Agent.get(self.agents[self.current])
+            self.current += 1
+            return ag
     

@@ -4,6 +4,7 @@ package KVStore;
 
 
 service KvStore {
+    rpc ping(VoidMsg) returns (VoidMsg) {}
     rpc obtainId(VoidMsg) returns (PayloadMsg) {}
     rpc findNode(PayloadMsg) returns (PayloadMsg) {}
 

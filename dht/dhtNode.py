@@ -8,28 +8,37 @@ from dataclasses import dataclass, field, asdict
 from typing import List, Dict
 
 from agentNode import Node, AdressHolder, Agent
+from key import HashKey
 
-class DhtNodeHolder:
-    dhtNodes = {}
+from localNodeLib import LocalNodeLib
+from distantNodeLib import DistantNodeLib
+
 
 @dataclass
 class Successor:
-    _successor: str = field(default="", repr=False)
-    _finger: List[str] = field(default_factory=list, repr=False)
+    _successor: HashKey = field(default=None, repr=False)
+    _finger: List[HashKey] = field(default_factory=list, repr=False)
     
 
 
 @dataclass
 class DhtNode:
-    nodeId: str = ""
-    rank: int = -1
-    _predecessor: str = field(default="", repr=False)
+    local: bool = False
+    id: HashKey = None
+    _predecessor: HashKey = field(default=None, repr=False)
     _Successor: Successor = field(default_factory=Successor, repr=False)
     
     # ces fonctions vont appeler une librairie logique, qui aura besoin de grpc, et des Nodes classiques
     
-    def check_predecessor(self):
-        pass
+    async def check_predecessor(self) -> bool:
+        if self.local:
+            predecessor_node = Node.get(self._predecessor.hashValue)
+            return await LocalNodeLib.check_predecessor(predecessor_node)
+            
+        # else:
+        #     dht_node_repr = Node.get(self.id.hashValue)
+        #     DistantNodeLib.check_predecessor(dht_node_repr)
+        # pass
     
     def find_successor(self, hash_id:str):
         pass
@@ -41,7 +50,8 @@ class DhtNode:
         pass
     
     def generate_key(self):
-        pass
+        if self.local:
+            self.id = HashKey.getRandom()
 
     def get_closest_preceding_finger(self, hash_id:str):
         pass
