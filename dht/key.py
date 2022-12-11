@@ -1,17 +1,62 @@
 import secrets
 import hashlib
 
-from typing import Union
+from typing import Union, List
         
+
     
 class HashKey:
-    def __init__(self, value:str) -> None:
-        self.value = value
-        self.hashValue = self.hash()
+    
+
+    
+    def __init__(self, value:str, fromHash=False) -> None:
+        if fromHash:
+            self.value = value
+            self.hashValue = value
+        else:
+            self.value = value
+            self.hashValue = self.hash()
+        
+    @classmethod
+    def getUsableHashVal(self, value: Union[str, 'HashKey']) -> str:
+        if isinstance(value, str):
+            return value
+        
+        return value.hashValue
+        
+    @classmethod
+    def getHashKeyClean(self, value:Union[str, 'HashKey']) -> 'HashKey':
+        if isinstance(value, str):
+            return HashKey(value, fromHash=True)
+        return value
+        
         
     @classmethod
     def getRandom(self) -> 'HashKey':
         return HashKey(secrets.token_hex(256))
+    
+    @classmethod
+    def fromInt(self, val:int) -> 'HashKey':
+        stringVal = format(val, '0>{}x'.format(256 // 4))
+        return HashKey(stringVal, True)
+    
+    def toInt(self) -> int:
+        return int(self.hashValue, 16)
+    
+    
+    def findClosestsGuardians(self, keys:List['HashKey']) -> dict:
+        if len(keys) == 3 and keys[0] == keys[1] and keys[1] == keys[2]:
+            return {
+                    "closest_pred_known":keys[0],
+                    "closest_succ_known":keys[0], 
+                }
+        for i in range(-1, len(keys) - 1):
+            if self.is_between_r_inclus(keys[i], keys[i+1]):
+                return {
+                    "closest_pred_known":keys[i],
+                    "closest_succ_known":keys[i+1], 
+                }
+    
     
     def setValue(self, value: str, hashValue:str) -> None:
         self.value = value
@@ -64,6 +109,9 @@ class HashKey:
         :param HashKey limit2
         :return bool
         """
+        if limit1 > limit2:
+            return self > limit2 or self < limit1
+        
         return self > limit1 and self < limit2
     
     def is_between_r_inclus(self, limit1:'HashKey', limit2:'HashKey') -> bool:
@@ -84,7 +132,7 @@ class HashKey:
         """
         return (self != limit2 and self == limit1 ) or self.is_inside(limit1, limit2) 
     
-    def is_between_l_inclus(self, limit1:'HashKey', limit2:'HashKey') -> bool:
+    def is_between_all_inclus(self, limit1:'HashKey', limit2:'HashKey') -> bool:
         """true if self @ [limit1, limit2]
 
         :param HashKey limit1
@@ -93,12 +141,8 @@ class HashKey:
         """
         return (self == limit2 or self == limit1) or self.is_inside(limit1, limit2)
 
-     
-    
-    
-    
     def __repr__(self) -> str:
-        return self.value[:5] + ".. ; " + self.hashValue[:15] + ".."
+        return self.hashValue
     
     def __gt__(self, otherKey:'HashKey') -> bool:
         return self.hashValue > otherKey.hashValue
@@ -149,5 +193,19 @@ class HashKey:
     
     
 if __name__ == '__main__':
+    
+    # keys = []
+    # keys.append(HashKey(2**256, True))
+    # print(keys[0].hashValue in keys)
+    # print(len(keys[0].hashValue))
+    
+    # keys = [HashKey.getRandom() for i in range(4)]
+    # keys.sort()
+    # print(keys)
+    # print()
+    # print(key.subint(1))
+    # print(len(format(2**256, '0>{}x'.format(256 // 4))))
+
+    
     pass
     

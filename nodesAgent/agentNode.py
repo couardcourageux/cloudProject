@@ -111,10 +111,11 @@ class Node:
         return dict
     
     def agents(self) -> Dict[str, 'Agent']:
-        sortedAgents = sorted(self.agents, key=lambda a: a.rank)
-        output = {x: Agent.get(x) for x in sortedAgents if x.rank >= 0}
-        output = {k: v for k, v in output.items() if v is not None}
-        return output
+        sortedAgents = sorted([Agent.get(x) for x in self._agents], key=lambda a: a.rank)
+        filteredAgents = list(filter(lambda x: not isinstance(x, type(None)), sortedAgents))
+        filteredAgents = list(filter(lambda x: x.rank >= 0, filteredAgents))
+
+        return {x.id: x for x in filteredAgents}
     
     def getAgentsIterator(self) -> 'NodeIteratorOverAgents':
         return NodeIteratorOverAgents(self)

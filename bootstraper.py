@@ -33,14 +33,19 @@ class Holder:
 
 if __name__ == "__main__":
     
+    
+    localHashKey = HashKey.getRandom()
     dhtNode = DhtNode(
         local=True,
-        id=HashKey.getRandom()
+        id=localHashKey,
+        _predecessor=localHashKey,
+        _successor=localHashKey,
+        _finger=[None for i in range(256)]
     )
-    localHashKey = dhtNode.id
-    dhtNode._predecessor = localHashKey
-    dhtNode._Successor._successor = localHashKey
-    Holder.setDhtNode(dhtNode)
+    
+    dhtNode._finger[0] = localHashKey
+    # Holder.setDhtNode(dhtNode)
+    DhtNode.register(dhtNode)
     
     localNode = Node(localHashKey.hashValue)
     Node.register(localNode)
@@ -49,13 +54,19 @@ if __name__ == "__main__":
         HashKey.getRandom().value,
         "localhost", 
         "5005", 
-        localNode.id
+        0
     )
     Agent.register(localAgent)
     localNode.addAgent(localAgent.id)
     
+    async def runTest():
+        res = await dhtNode._find_successor_rec(localHashKey, True)
+        print(res)
+    
+    asyncio.run(runTest())
     
     
+    # print(dhtNode.toDict())
     
-    asyncio.run(serve(5000))
+    # asyncio.run(serve(5005))
     
