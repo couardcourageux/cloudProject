@@ -1,0 +1,32 @@
+{ 'dhtNodeData': 
+  { 'local': True, 
+    'id': 95bb62fde5469d8ca86efb22026c283ff5a44d0fd5a250866ebd7fadd3cde163, 
+    '_predecessor': 95bb62fde5469d8ca86efb22026c283ff5a44d0fd5a250866ebd7fadd3cde163, 
+    '_successor': 95bb62fde5469d8ca86efb22026c283ff5a44d0fd5a250866ebd7fadd3cde163
+  }, 
+  'LogicalNode': 
+    { 'id': '95bb62fde5469d8ca86efb22026c283ff5a44d0fd5a250866ebd7fadd3cde163', 
+      '_agents': 
+        [
+          { 'id': 'df64ea1f12a27d3905c08b290ac62bce64429d795b581cca445b1db688fdbda1c7bd0ae524204024fd46fea7d4414dcb6cc134dabe08c607152865cbc69ee18fabe877dd1e3961cf35e3b900fb3bf0c14ae05281a5659b2bfebd22fcddc221c12349c71ca1bb1123afa4dabf52b29a44dff0f31f65575bd8121f29996de99fe13e0a99b5813603c2173b042131c0b877815ee5e6fd913276f01f75678aa72722adcdc4ff69f998543ceede914c55a94c6889a9c542d17e69e0bbbf9d6bd54ef56e8197cdb34ec26ffec79a9964510369fbf0995ba37702e80d0e2da83abec21afa93fafa205d01e85740fd620acb85316db3d960cbd836210f3810aa66fa1534', 
+            'ip': 
+            'localhost', 
+            'port': 
+            '5005', 
+            'rank': 0, 
+            '_hosting': '', 
+            'capacity': 4000
+          }
+        ]
+    }, 
+  'predDhtNode': 
+    { 'local': True, 
+      'id': 95bb62fde5469d8ca86efb22026c283ff5a44d0fd5a250866ebd7fadd3cde163, 
+      '_predecessor': 95bb62fde5469d8ca86efb22026c283ff5a44d0fd5a250866ebd7fadd3cde163, 
+      '_successor': 95bb62fde5469d8ca86efb22026c283ff5a44d0fd5a250866ebd7fadd3cde163
+    }, 
+  'succDhtNode': 
+    { 'local': True, 
+      'id': 95bb62fde5469d8ca86efb22026c283ff5a44d0fd5a250866ebd7fadd3cde163, 
+      '_predecessor': 95bb62fde5469d8ca86efb22026c283ff5a44d0fd5a250866ebd7fadd3cde163, 
+      '_successor': 95bb62fde5469d8ca86efb22026c283ff5a44d0fd5a250866ebd7fadd3cde163}}

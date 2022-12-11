@@ -16,6 +16,7 @@ from distantNodeLib import DistantNodeLib
 
 class DhtHolder:
     dhtNodes = {}
+    localNodeHashVal = ""
     
     
     
@@ -41,7 +42,16 @@ class DhtNode:
         return DhtHolder.dhtNodes.get(dht_id_val, None)
     
     @classmethod
+    def getLocal(self):
+        return DhtHolder.dhtNodes.get(DhtHolder.localNodeHashVal, None)
+    
+    
+    @classmethod
     def unlist(self, dht_id: str | HashKey) -> None:
+        if isinstance(dht_id, str):
+            Node.unlist(dht_id)
+        else:
+            Node.unlist(dht_id.hashValue)
         DhtHolder.dhtNodes.pop(HashKey.getUsableHashVal(dht_id), None)
     ##############################################
     def toDict(self) -> dict:
@@ -53,13 +63,11 @@ class DhtNode:
     def fromDict(self, descriptor:dict) -> 'DhtNode':
         return DhtNode(
             descriptor["local"],
-            descriptor["id"],
+            HashKey(descriptor["id"], True),
             descriptor["_predecessor"],
             descriptor["_successor"]
         )
     ##############################################
-    
-
     
     async def check_predecessor(self) -> bool:
         if self.local:
@@ -71,10 +79,8 @@ class DhtNode:
         #     DistantNodeLib.check_predecessor(dht_node_repr)
         # pass
     
-    async def find_successor(self, hash_id:str):
-        pass
         
-    async def _find_successor_rec(self, hashKey:str | HashKey, withNeighbors=False):
+    async def find_successor(self, hashKey:str | HashKey, withNeighbors=False):
         """return the descriptor of the DhtNode responsible for the key
 
         :param  hashKey 
@@ -108,7 +114,7 @@ class DhtNode:
                     return
             else:
                 remote = DhtNode.get(guardians["closest_pred_known"])
-                return await remote._find_successor_rec(id_val)
+                return await remote.find_successor(id_val)
         
         else:
             # on appelle la remote via grpc
@@ -116,8 +122,6 @@ class DhtNode:
 
     
     def _fix_finger(self, finger_id:str):
-        
-        
         remoteNode = DhtNode.get(self._finger[finger_id])
         # await ping
         ping_resp = True
@@ -129,8 +133,6 @@ class DhtNode:
         if self.local:
             self.id = HashKey.getRandom()
 
-    def get_closest_preceding_finger(self, hash_id:str):
-        pass
     
     def init_finger_table(self):
         pass
@@ -144,21 +146,83 @@ class DhtNode:
     def stabilize(self):
         pass
 
-    def update_neighbors(self):
-        pass
+    async def update_neighbors(self):
+        if self.local:
+            dhtPred = DhtNode.get(self._predecessor)
+            dhtSucc = DhtNode.get(self._successor)
+            selfDescriptor = exportDhtNodeDescriptor(self)
+            await dhtPred.update_successor(selfDescriptor)
+            await dhtSucc.update_predecessor(selfDescriptor)
+            return
+            
     
-    def update_others(self):
-        pass
+    async def update_others(self):
+        if self.local:
+            for i in range(256):
+                predKey = self.id.subint(2**i)
+                predNodeDescriptor = await self.find_successor(predKey)
+                remote = SimpleRemote(predNodeDescriptor["LogicalNode"])
+                await remote._update_finger_table(exportDhtNodeDescriptor(self), i)
+            
+    
+    async def _update_finger_table(self, callingNodeDescriptorFull:dict, i:int) -> None:
+        if self.local:
+            distantDhtNode = DhtNode.fromDict(callingNodeDescriptorFull["dhtNodeData"])
+            if distantDhtNode.id == self.id:
+                return 
+            DhtNode.register(distantDhtNode)
+            Node.importFromDict(callingNodeDescriptorFull["LogicalNode"])
+            
+            Node.unlist(self._finger[i].hashValue)
+            self._finger[i] = distantDhtNode.id
+        return
+        
 
-    def update_successor(self):
-        pass
+    async def update_successor(self, callingNodeDescriptorFull:dict):
+        if self.local:
+            distantDhtNode = DhtNode.fromDict(callingNodeDescriptorFull["dhtNodeData"])
+            DhtNode.register(distantDhtNode)
+            Node.importFromDict(callingNodeDescriptorFull["LogicalNode"])
+            self._successor = distantDhtNode.id
+            self._finger[0] = distantDhtNode.id
+            return
+        else:
+            # call grpc method to update
+            return
+    
+    async def update_predecessor(self, callingNodeDescriptorFull:dict):
+        if self.local:
+            distantDhtNode = DhtNode.fromDict(callingNodeDescriptorFull["dhtNodeData"])
+            DhtNode.register(distantDhtNode)
+            Node.importFromDict(callingNodeDescriptorFull["LogicalNode"])
+            DhtNode.unlist(self._predecessor)
+            self._predecessor = distantDhtNode.id
+            return
+        else:
+            # call grpc method to update
+            return
 
     def update_successor_list(self):
         pass
 
 
 
-
+class SimpleRemote:
+    
+    def __init__(self, logicalNodeDescriptor:dict) -> None:
+        self.logicalNode = Node.importFromDict(logicalNodeDescriptor)
+        
+    async def _update_finger_table(self, callingNodeDescriptorFull:dict, i:int) -> None:
+        # rpc call to agents of _update_finger_table
+        pass
+        
+    def close(self):
+        Node.unlist(self.logicalNode.id)
+        
+    def __del__(self) -> None:
+        self.close()    
+        
+        
 
 
 

@@ -24,10 +24,35 @@ class KvStoreStub(object):
                 request_serializer=protocol__pb2.VoidMsg.SerializeToString,
                 response_deserializer=protocol__pb2.PayloadMsg.FromString,
                 )
-        self.findNode = channel.unary_unary(
-                '/KVStore.KvStore/findNode',
+        self.findSuccessor = channel.unary_unary(
+                '/KVStore.KvStore/findSuccessor',
                 request_serializer=protocol__pb2.PayloadMsg.SerializeToString,
                 response_deserializer=protocol__pb2.PayloadMsg.FromString,
+                )
+        self.checkPredecessor = channel.unary_unary(
+                '/KVStore.KvStore/checkPredecessor',
+                request_serializer=protocol__pb2.VoidMsg.SerializeToString,
+                response_deserializer=protocol__pb2.VoidMsg.FromString,
+                )
+        self.getUpdatedDhtDescriptor = channel.unary_unary(
+                '/KVStore.KvStore/getUpdatedDhtDescriptor',
+                request_serializer=protocol__pb2.VoidMsg.SerializeToString,
+                response_deserializer=protocol__pb2.PayloadMsg.FromString,
+                )
+        self.updateFingerTable = channel.unary_unary(
+                '/KVStore.KvStore/updateFingerTable',
+                request_serializer=protocol__pb2.PayloadMsg.SerializeToString,
+                response_deserializer=protocol__pb2.VoidMsg.FromString,
+                )
+        self.updateSuccessor = channel.unary_unary(
+                '/KVStore.KvStore/updateSuccessor',
+                request_serializer=protocol__pb2.PayloadMsg.SerializeToString,
+                response_deserializer=protocol__pb2.VoidMsg.FromString,
+                )
+        self.updatePredecessor = channel.unary_unary(
+                '/KVStore.KvStore/updatePredecessor',
+                request_serializer=protocol__pb2.PayloadMsg.SerializeToString,
+                response_deserializer=protocol__pb2.VoidMsg.FromString,
                 )
 
 
@@ -46,7 +71,37 @@ class KvStoreServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def findNode(self, request, context):
+    def findSuccessor(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def checkPredecessor(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def getUpdatedDhtDescriptor(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def updateFingerTable(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def updateSuccessor(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def updatePredecessor(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -65,10 +120,35 @@ def add_KvStoreServicer_to_server(servicer, server):
                     request_deserializer=protocol__pb2.VoidMsg.FromString,
                     response_serializer=protocol__pb2.PayloadMsg.SerializeToString,
             ),
-            'findNode': grpc.unary_unary_rpc_method_handler(
-                    servicer.findNode,
+            'findSuccessor': grpc.unary_unary_rpc_method_handler(
+                    servicer.findSuccessor,
                     request_deserializer=protocol__pb2.PayloadMsg.FromString,
                     response_serializer=protocol__pb2.PayloadMsg.SerializeToString,
+            ),
+            'checkPredecessor': grpc.unary_unary_rpc_method_handler(
+                    servicer.checkPredecessor,
+                    request_deserializer=protocol__pb2.VoidMsg.FromString,
+                    response_serializer=protocol__pb2.VoidMsg.SerializeToString,
+            ),
+            'getUpdatedDhtDescriptor': grpc.unary_unary_rpc_method_handler(
+                    servicer.getUpdatedDhtDescriptor,
+                    request_deserializer=protocol__pb2.VoidMsg.FromString,
+                    response_serializer=protocol__pb2.PayloadMsg.SerializeToString,
+            ),
+            'updateFingerTable': grpc.unary_unary_rpc_method_handler(
+                    servicer.updateFingerTable,
+                    request_deserializer=protocol__pb2.PayloadMsg.FromString,
+                    response_serializer=protocol__pb2.VoidMsg.SerializeToString,
+            ),
+            'updateSuccessor': grpc.unary_unary_rpc_method_handler(
+                    servicer.updateSuccessor,
+                    request_deserializer=protocol__pb2.PayloadMsg.FromString,
+                    response_serializer=protocol__pb2.VoidMsg.SerializeToString,
+            ),
+            'updatePredecessor': grpc.unary_unary_rpc_method_handler(
+                    servicer.updatePredecessor,
+                    request_deserializer=protocol__pb2.PayloadMsg.FromString,
+                    response_serializer=protocol__pb2.VoidMsg.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -115,7 +195,7 @@ class KvStore(object):
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def findNode(request,
+    def findSuccessor(request,
             target,
             options=(),
             channel_credentials=None,
@@ -125,8 +205,93 @@ class KvStore(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/KVStore.KvStore/findNode',
+        return grpc.experimental.unary_unary(request, target, '/KVStore.KvStore/findSuccessor',
             protocol__pb2.PayloadMsg.SerializeToString,
             protocol__pb2.PayloadMsg.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def checkPredecessor(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/KVStore.KvStore/checkPredecessor',
+            protocol__pb2.VoidMsg.SerializeToString,
+            protocol__pb2.VoidMsg.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def getUpdatedDhtDescriptor(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/KVStore.KvStore/getUpdatedDhtDescriptor',
+            protocol__pb2.VoidMsg.SerializeToString,
+            protocol__pb2.PayloadMsg.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def updateFingerTable(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/KVStore.KvStore/updateFingerTable',
+            protocol__pb2.PayloadMsg.SerializeToString,
+            protocol__pb2.VoidMsg.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def updateSuccessor(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/KVStore.KvStore/updateSuccessor',
+            protocol__pb2.PayloadMsg.SerializeToString,
+            protocol__pb2.VoidMsg.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def updatePredecessor(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/KVStore.KvStore/updatePredecessor',
+            protocol__pb2.PayloadMsg.SerializeToString,
+            protocol__pb2.VoidMsg.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

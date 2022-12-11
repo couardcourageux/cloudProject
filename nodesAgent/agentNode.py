@@ -87,6 +87,9 @@ class Node:
     
     @classmethod
     def unlist(self, node_id:str) -> None:
+        iterator = Node.getAgentsIterator()
+        while iterator.hasNext():
+            Agent.unlist(iterator.getNext().id)
         AdressHolder.nodes.pop(node_id, None)
     #############################################################
     @classmethod
@@ -140,7 +143,7 @@ class NodeIteratorOverAgents:
     def hasNext(self) -> bool:
         return self.current < self.limit
         
-    def next(self) -> Agent:
+    def getNext(self) -> Agent:
         if self.hasNext():
             ag = Agent.get(self.agents[self.current])
             self.current += 1

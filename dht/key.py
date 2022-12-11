@@ -80,7 +80,8 @@ class HashKey:
             print(value)
             raise TypeError     
         
-        res = (int(self.value, 16) + val) % pow(2, 256)
+        res = (int(self.hashValue, 16) + val) % pow(2, 256)
+        res = format(res, '0>{}x'.format(256 // 4))
         return self.canonicalize(res)
     
     def subint(self, value: Union[int, str, 'HashKey']) -> str:
@@ -94,7 +95,8 @@ class HashKey:
             print(value)
             raise TypeError    
         
-        res = (int(self.value, 16) - val) % pow(2, 256)
+        res = (int(self.hashValue, 16) - val) % pow(2, 256)
+        res = format(res, '0>{}x'.format(256 // 4))
         return self.canonicalize(res) 
         
     

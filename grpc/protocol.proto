@@ -6,7 +6,12 @@ package KVStore;
 service KvStore {
     rpc ping(VoidMsg) returns (VoidMsg) {}
     rpc obtainId(VoidMsg) returns (PayloadMsg) {}
-    rpc findNode(PayloadMsg) returns (PayloadMsg) {}
+    rpc findSuccessor(PayloadMsg) returns (PayloadMsg) {}
+    rpc checkPredecessor(VoidMsg) returns (VoidMsg) {}
+    rpc getUpdatedDhtDescriptor(VoidMsg) returns (PayloadMsg) {}
+    rpc updateFingerTable(PayloadMsg) returns (VoidMsg) {}
+    rpc updateSuccessor(PayloadMsg) returns (VoidMsg) {}
+    rpc updatePredecessor(PayloadMsg) returns (VoidMsg) {}
 
 
 }

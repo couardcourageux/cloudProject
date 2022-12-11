@@ -58,9 +58,10 @@ if __name__ == "__main__":
     )
     Agent.register(localAgent)
     localNode.addAgent(localAgent.id)
+    # print(localHashKey.hashValue)
     
     async def runTest():
-        res = await dhtNode._find_successor_rec(localHashKey, True)
+        res = await dhtNode.find_successor(localHashKey, True)
         print(res)
     
     asyncio.run(runTest())
