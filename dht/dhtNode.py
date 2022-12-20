@@ -45,6 +45,8 @@ class DhtNode:
     def getLocal(self):
         return DhtHolder.dhtNodes.get(DhtHolder.localNodeHashVal, None)
     
+    def setLocal(self):
+        DhtHolder.localNodeHashVal = self.id.hashValue
     
     @classmethod
     def unlist(self, dht_id: str | HashKey) -> None:
@@ -56,6 +58,9 @@ class DhtNode:
     ##############################################
     def toDict(self) -> dict:
         descriptor = asdict(self)
+        descriptor["id"] = descriptor["id"].hashValue
+        descriptor["_predecessor"] = descriptor["_predecessor"].hashValue
+        descriptor["_successor"] = descriptor["_successor"].hashValue
         descriptor.pop("_finger", None)
         return descriptor
     
@@ -64,8 +69,8 @@ class DhtNode:
         return DhtNode(
             descriptor["local"],
             HashKey(descriptor["id"], True),
-            descriptor["_predecessor"],
-            descriptor["_successor"]
+            HashKey(descriptor["_predecessor"], True),
+            HashKey(descriptor["_successor"], True),
         )
     ##############################################
     
@@ -74,10 +79,9 @@ class DhtNode:
             predecessor_node = Node.get(self._predecessor.hashValue)
             return await LocalNodeLib.check_predecessor(predecessor_node)
             
-        # else:
-        #     dht_node_repr = Node.get(self.id.hashValue)
-        #     DistantNodeLib.check_predecessor(dht_node_repr)
-        # pass
+        else:
+            remote = SimpleRemote(exportDhtNodeDescriptor(self))
+            await remote.check_predecessor()
     
         
     async def find_successor(self, hashKey:str | HashKey, withNeighbors=False):
@@ -100,25 +104,30 @@ class DhtNode:
                     dhtNodeData["predDhtNode"] = predNode.toDict()
                     dhtNodeData["succDhtNode"] = succNode.toDict()
                     
-                # describe self
                 return dhtNodeData
             
             
-            if guardians["closest_succ_known"] == self._successor:
+            elif guardians["closest_succ_known"] == self._successor:
                 dhtNodeData = exportDhtNodeDescriptor(DhtNode.get(self._successor))
-                if not withNeighbors:
-                    return exportDhtNodeDescriptor(dhtNodeData)
-                else:
-                    # remoteCall
-                    #describe successor
-                    return
+                
+                if  withNeighbors:
+                    dhtNodeData["predDhtNode"] = self.toDict() 
+                    dhtNodeData["succDhtNode"] = self.find_successor(DhtNode.get(self._successor)._successor)
+                return dhtNodeData
             else:
+                print("else")
                 remote = DhtNode.get(guardians["closest_pred_known"])
-                return await remote.find_successor(id_val)
+                return await remote.find_successor(id_val, withNeighbors)
         
         else:
-            # on appelle la remote via grpc
-            return
+            print("remote call")
+            remote = Node.get(self.id.hashValue)
+            if isinstance(hashKey, HashKey):
+                searched = hashKey.hashValue
+            else:
+                searched = hashKey
+                
+            return await LocalNodeLib.find_successor(searched, remote, withNeighbors)
 
     
     def _fix_finger(self, finger_id:str):
@@ -153,8 +162,19 @@ class DhtNode:
             selfDescriptor = exportDhtNodeDescriptor(self)
             await dhtPred.update_successor(selfDescriptor)
             await dhtSucc.update_predecessor(selfDescriptor)
-            return
+    
+    @classmethod
+    async def udpate_local_image(self, hashKey:HashKey):
+        dhtNode = DhtNode.get(hashKey)
+        # print(exportDhtNodeDescriptor(dhtNode))
+        if not dhtNode.local:
+            result = await dhtNode.getUpdatedDescriptor()
             
+            importDhtNodeDescriptor(result)
+            
+    
+    async def getUpdatedDescriptor(self):
+           return await LocalNodeLib.getUpdatedDescriptor(Node.get(self.id.hashValue))
     
     async def update_others(self):
         if self.local:
@@ -175,32 +195,33 @@ class DhtNode:
             
             Node.unlist(self._finger[i].hashValue)
             self._finger[i] = distantDhtNode.id
-        return
-        
+        else:
+            
+            remote = Node.get(self.id.hashValue)
+            await LocalNodeLib.updateFingerTable(callingNodeDescriptorFull, i, remote)
+                    
 
     async def update_successor(self, callingNodeDescriptorFull:dict):
         if self.local:
-            distantDhtNode = DhtNode.fromDict(callingNodeDescriptorFull["dhtNodeData"])
-            DhtNode.register(distantDhtNode)
-            Node.importFromDict(callingNodeDescriptorFull["LogicalNode"])
-            self._successor = distantDhtNode.id
-            self._finger[0] = distantDhtNode.id
+            distantNodeHashVal = importDhtNodeDescriptor(callingNodeDescriptorFull)
+            self._successor = HashKey(distantNodeHashVal, True)
+            self._finger[0] = HashKey(distantNodeHashVal, True)
             return
         else:
-            # call grpc method to update
-            return
+            remote = Node.get(self.id.hashValue)               
+            await LocalNodeLib.updateSuccessor(callingNodeDescriptorFull, remote)
+            return 
+            
     
     async def update_predecessor(self, callingNodeDescriptorFull:dict):
         if self.local:
-            distantDhtNode = DhtNode.fromDict(callingNodeDescriptorFull["dhtNodeData"])
-            DhtNode.register(distantDhtNode)
-            Node.importFromDict(callingNodeDescriptorFull["LogicalNode"])
-            DhtNode.unlist(self._predecessor)
-            self._predecessor = distantDhtNode.id
+            distantNodeHashVal = importDhtNodeDescriptor(callingNodeDescriptorFull)
+            self._predecessor = HashKey(distantNodeHashVal, True)
             return
         else:
-            # call grpc method to update
-            return
+            remote = Node.get(self.id.hashValue)               
+            await LocalNodeLib.updatePredecessor(callingNodeDescriptorFull, remote)
+            return 
 
     def update_successor_list(self):
         pass
@@ -210,11 +231,20 @@ class DhtNode:
 class SimpleRemote:
     
     def __init__(self, logicalNodeDescriptor:dict) -> None:
-        self.logicalNode = Node.importFromDict(logicalNodeDescriptor)
+        self.logicalNode = Node.get(Node.importFromDict(logicalNodeDescriptor))
+        
+    async def findSuccessor(self, hashKey:str):
+        print(hashKey)
+        truc = await LocalNodeLib.find_successor(hashKey, self.logicalNode)
+        print(truc)
+        return truc
         
     async def _update_finger_table(self, callingNodeDescriptorFull:dict, i:int) -> None:
         # rpc call to agents of _update_finger_table
         pass
+    
+    async def check_predecessor(self):
+        await LocalNodeLib.make_check_predecessor(self.logicalNode)        
         
     def close(self):
         Node.unlist(self.logicalNode.id)
@@ -228,7 +258,24 @@ class SimpleRemote:
 
 
 def exportDhtNodeDescriptor(dhtNode:DhtNode) -> dict:
+    node = Node.get(dhtNode.id.hashValue)
     return {
         "dhtNodeData":dhtNode.toDict(),
-        "LogicalNode": Node.get(dhtNode.id.hashValue).toDict()
+        "LogicalNode": node.toDict()
     }
+
+def importDhtNodeDescriptor(descriptor:dict, localOverride=False) -> str:
+    dhtDesc = descriptor["dhtNodeData"]
+    nodeDesc = descriptor["LogicalNode"]
+    
+    dhtDesc["local"] = localOverride
+    dhtNode = DhtNode.fromDict(dhtDesc)
+    DhtNode.register(dhtNode)
+    if localOverride:
+        dhtNode.setLocal()
+    
+    return Node.importFromDict(nodeDesc)
+    
+    
+    
+    

@@ -43,6 +43,7 @@ class KvStoreClient():
         #     #we need to raise an exception instead of return None
         return json.loads(response.jsonData)
         
+        
     @classmethod
     async def checkPredecessor(self, distantAgentHost:str):
         async with aio.insecure_channel(distantAgentHost) as ch:

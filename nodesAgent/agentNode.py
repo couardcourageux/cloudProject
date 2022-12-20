@@ -40,19 +40,32 @@ class Agent:
     def importFromDict(self, dict:Dict) -> str:
         ag = Agent.fromDict(dict)
         Agent.register(ag)
-        return ag.agent_id
+        return ag.id
     ##########################
     @classmethod
     def register(self, agent:'Agent') -> None:
-        AdressHolder.agents[agent.id] = agent
+        truc = AdressHolder.agents.get(agent.id, None)
+        if truc != None:
+            AdressHolder.agents[agent.id]["use"] +=1
+        AdressHolder.agents[agent.id] = {"agent": agent, "use":1}
             
     @classmethod
     def get(self, agent_id:str) -> 'Agent':
-        return AdressHolder.agents.get(agent_id, None)
+        truc = AdressHolder.agents.get(agent_id, None)
+        if truc == None:
+            return 
+        return truc["agent"]
     
     @classmethod
     def unlist(self, agent_id:str) -> None:
-        AdressHolder.agents.pop(agent_id, None)
+        truc = AdressHolder.agents.get(agent_id, None)
+        if truc != None:
+            if truc["use"] <= 1:
+                AdressHolder.agents.pop(agent_id, None)
+            else:
+                truc["use"] -=1
+        else:
+            AdressHolder.agents.pop(agent_id, None)
     #################################################
     
     def toDict(self) -> Dict:
@@ -78,19 +91,39 @@ class Node:
     #############################################################
     @classmethod
     def register(self, node:'Node') -> str:
-        AdressHolder.nodes[node.id] = node
+        truc = AdressHolder.nodes.get(node.id, None)
+        if truc != None:
+            AdressHolder.nodes[node.id]["use"] +=1
+        AdressHolder.nodes[node.id] = {"node": node, "use":1}
         return node.id
+    
             
     @classmethod
     def get(self, node_id:str) -> 'Node':
-        return AdressHolder.nodes.get(node_id, None)
+        truc = AdressHolder.nodes.get(node_id, None)
+        if truc == None:
+            return 
+        return truc["node"]
     
     @classmethod
     def unlist(self, node_id:str) -> None:
-        iterator = Node.getAgentsIterator()
-        while iterator.hasNext():
-            Agent.unlist(iterator.getNext().id)
-        AdressHolder.nodes.pop(node_id, None)
+        truc = AdressHolder.nodes.get(node_id, None)
+        needToPop = False
+        if truc != None:
+            if truc["use"] <= 1:
+                needToPop = True
+            else:
+                truc["use"] -=1
+        else:
+            needToPop = True
+
+        if needToPop:
+            node = Node.get(node_id)
+            if node != None:
+                iterator = node.getAgentsIterator()
+                while iterator.hasNext():
+                    Agent.unlist(iterator.getNext().id)
+            AdressHolder.nodes.pop(node_id, None)
     #############################################################
     @classmethod
     def fromDict(self, dict:Dict) -> 'Node':
@@ -102,9 +135,9 @@ class Node:
         Node.register(node)
         for dc in dict["_agents"]:
             ag_id = Agent.importFromDict(dc)
-            node.addAgent(Agent.get(ag_id))
+            node.addAgent(ag_id)
             
-        return node.Node_id
+        return node.id
     #############################################################
     
     def toDict(self):

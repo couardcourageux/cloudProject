@@ -29,10 +29,11 @@ def decoTryConnection(nodeIterator:NodeIteratorOverAgents,
         async def wrapper_func(*args, **kwargs):
             if n_addr == - 1:
                 while nodeIterator.hasNext():
+                    addr = nodeIterator.getNext().getAddr()
                     count = 0
                     while count < per_addr:
                         try:
-                            return await func(*args, distantAgentHost=nodeIterator.getNext().getAddr(), **kwargs)
+                            return await func(*args, distantAgentHost=addr, **kwargs)
                         except grpc.RpcError as err:
                             print(f"{err=}, {type(err)=}")
                             count += 1
@@ -40,14 +41,18 @@ def decoTryConnection(nodeIterator:NodeIteratorOverAgents,
             else :
                 ext_count = 0
                 while ext_count < n_addr:
-                    count = 0
-                    while count < per_addr:
-                        try:
-                            return await func(*args, distantAgentHost=nodeIterator.getNext().getAddr(), **kwargs)
-                        except grpc.RpcError as err:
-                            print(f"{err=}, {type(err)=}")
-                            count += 1
-                    ext_count += 1
+                    if nodeIterator.hasNext():
+                        addr = nodeIterator.getNext().getAddr()
+                        count = 0
+                        while count < per_addr:
+                            try:
+                                return await func(*args, distantAgentHost=addr, **kwargs)
+                            except grpc.RpcError as err:
+                                print(f"{err=}, {type(err)=}")
+                                count += 1
+                        ext_count += 1
+                    else:
+                        break
                 raise ConnectionNotFoundException("to change")
                         
             return 

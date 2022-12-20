@@ -19,18 +19,6 @@ from agentNode import Agent, Node
 
 
 
-class Holder:
-    dhtNode = None
-    
-    @classmethod
-    def setDhtNode(self, node: DhtNode) -> None:
-        self.dhtNode = node
-    
-    @classmethod
-    def getDhtNode(self) -> DhtNode:
-        return self.dhtNode
-
-
 if __name__ == "__main__":
     
     
@@ -44,8 +32,8 @@ if __name__ == "__main__":
     )
     
     dhtNode._finger[0] = localHashKey
-    # Holder.setDhtNode(dhtNode)
     DhtNode.register(dhtNode)
+    dhtNode.setLocal()
     
     localNode = Node(localHashKey.hashValue)
     Node.register(localNode)
@@ -58,16 +46,17 @@ if __name__ == "__main__":
     )
     Agent.register(localAgent)
     localNode.addAgent(localAgent.id)
-    # print(localHashKey.hashValue)
     
     async def runTest():
         res = await dhtNode.find_successor(localHashKey, True)
-        print(res)
-    
-    asyncio.run(runTest())
-    
-    
-    # print(dhtNode.toDict())
-    
-    # asyncio.run(serve(5005))
+        # for c, v in res.items():
+        #     print(c, v)
+        # print()
+        # res = await dhtNode.find_successor(localHashKey)
+        # for c, v in res.items():
+        #     print(c, v)
+
+    # asyncio.run(runTest())    
+    # print(DhtNode.getLocal())
+    asyncio.run(serve(5005))
     
