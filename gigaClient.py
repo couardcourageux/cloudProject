@@ -74,8 +74,10 @@ if __name__ == "__main__":
         # print(Node.get(dhtNode._successor.hashValue))
         await dhtNode.udpate_local_image(dhtNode._successor)
         
-        
-        
-    asyncio.run(runJoin())
-    asyncio.run(serve(PORT))
+    asyncio.run(runJoin()) 
+    try:   
+        asyncio.run(serve(PORT))
+    except:
+        print("oh no")
+    
     
