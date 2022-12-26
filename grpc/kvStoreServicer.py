@@ -15,6 +15,7 @@ from dhtNode import DhtNode
 
 class KvStoreServicer(protocol_pb2_grpc.KvStoreServicer):
     async def ping(self, request, context):
+        print("pinged")
         return protocol_pb2.VoidMsg()
         
     async def obtainId(self, request, context):

@@ -15,7 +15,7 @@ import asyncio
 from dhtNode import DhtNode
 from key import HashKey
 from agentNode import Agent, Node
-
+from kvStoreClient import KvStoreClient
 
 
 
@@ -48,6 +48,21 @@ if __name__ == "__main__":
     localNode.addAgent(localAgent.id)
     
     async def runTest():
-        res = await dhtNode.find_successor(localHashKey, True)
-    asyncio.run(serve(5005))
+        await asyncio.sleep(9)
+        print(await dhtNode._is_alive())
+        print(await DhtNode.get(dhtNode._predecessor)._is_alive())
+        print(await dhtNode.check_predecessor())
+        await KvStoreClient.plzDie("localhost:5006")
+        # await KvStoreClient.plzDie("localhost:5007")
+        await asyncio.sleep(4)
+        print(await dhtNode.check_predecessor())
+        print(await DhtNode.get(dhtNode._predecessor)._is_alive())
+        print(await dhtNode._is_alive())
+        
+    async def yehyehTest():
+        await asyncio.gather(runTest(), serve(5005))
+        
+        
+    # asyncio.run(serve(5005))
+    asyncio.run(yehyehTest())
     

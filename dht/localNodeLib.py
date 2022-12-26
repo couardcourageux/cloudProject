@@ -19,13 +19,13 @@ class LocalNodeLib:
         
         @decoTryConnection(iterator, n_addr=-1)
         async def func(distantAgentHost:str):
-            try:
-                await KvStoreClient.ping(distantAgentHost)
-                return True
-            except ConnectionNotFoundException as err:
-                return False
-            
-        return await func()
+            await KvStoreClient.ping(distantAgentHost)
+              
+        try:
+            await func()
+            return True
+        except ConnectionNotFoundException as err:
+            return False
     
     @classmethod
     async def make_check_predecessor(self, node:'Node') -> bool:
@@ -33,12 +33,13 @@ class LocalNodeLib:
         
         @decoTryConnection(iterator, n_addr=-1)
         async def func(distantAgentHost:str):
-            try:
-                await KvStoreClient.checkPredecessor(distantAgentHost)
-                return True
-            except ConnectionNotFoundException as err:
-                return False
-        return await func()
+            await KvStoreClient.checkPredecessor(distantAgentHost)
+  
+        try:
+            await func()
+            return True
+        except ConnectionNotFoundException as err:
+            return False
     
     
     @classmethod
@@ -47,12 +48,11 @@ class LocalNodeLib:
         
         @decoTryConnection(iterator, n_addr=-1)
         async def func(hashKey:str, withNeighbors:bool, distantAgentHost:str):
-            try:
-                truc =  await KvStoreClient.findSuccessor(distantAgentHost, hashKey, withNeighbors=withNeighbors if withNeighbors else False)
-                return truc
-            except  ConnectionNotFoundException as err:
-                raise err
-        return await func(hashKey, withNeighbors)
+            return await KvStoreClient.findSuccessor(distantAgentHost, hashKey, withNeighbors=withNeighbors if withNeighbors else False) 
+        try:
+            return await func(hashKey, withNeighbors)
+        except  ConnectionNotFoundException as err:
+            print(f"{err=}, {type(err)=}")
                
                
                
@@ -63,11 +63,12 @@ class LocalNodeLib:
         
         @decoTryConnection(iterator)
         async def func(callingNodeDesc:dict, distantAgentHost:str):
-            try:
-                return await KvStoreClient.updatePredecessor(distantAgentHost, callingNodeDesc)
-            except  ConnectionNotFoundException as err:
-                raise err
-        return await func(callingNodeDesc)
+            return await KvStoreClient.updatePredecessor(distantAgentHost, callingNodeDesc)
+
+        try:
+            return await func(callingNodeDesc)
+        except  ConnectionNotFoundException as err:
+            print(f"{err=}, {type(err)=}")
     
     @classmethod
     async def updateSuccessor(self, callingNodeDesc:dict, node:'Node'):
@@ -75,35 +76,38 @@ class LocalNodeLib:
         
         @decoTryConnection(iterator)
         async def func(callingNodeDesc:dict, distantAgentHost:str):
-            try:
-                return await KvStoreClient.updateSuccessor(distantAgentHost, callingNodeDesc)
-            except  ConnectionNotFoundException as err:
-                raise err
-        return await func(callingNodeDesc)
-    
+            return await KvStoreClient.updateSuccessor(distantAgentHost, callingNodeDesc)
+            
+        try:
+            return await func(callingNodeDesc)
+        except  ConnectionNotFoundException as err:
+            print(f"{err=}, {type(err)=}")
+            
     @classmethod
     async def updateFingerTable(self, callingNodeDescriptorFull, i, node):
         iterator = node.getAgentsIterator()
         
         @decoTryConnection(iterator)
         async def func(callingNodeDescriptorFull:dict, i:int, distantAgentHost:str):
-            try:
-                return await KvStoreClient.updateFingerTable(distantAgentHost, callingNodeDescriptorFull, i)
-            except  ConnectionNotFoundException as err:
-                raise err
-        return await func(callingNodeDescriptorFull, i)
-    
+            return await KvStoreClient.updateFingerTable(distantAgentHost, callingNodeDescriptorFull, i)
+            
+            
+        try:
+            return await func(callingNodeDescriptorFull, i)
+        except  ConnectionNotFoundException as err:
+            print(f"{err=}, {type(err)=}")
+        
     @classmethod
     async def getUpdatedDescriptor(self, node):
         iterator = node.getAgentsIterator()
         
         @decoTryConnection(iterator)
         async def func(distantAgentHost:str):
-            try:
-                return await KvStoreClient.getUpdatedDhtDescriptor(distantAgentHost)
-            except  ConnectionNotFoundException as err:
-                raise err
-        return await func()
+            return await KvStoreClient.getUpdatedDhtDescriptor(distantAgentHost) 
+        try:
+            return await func()
+        except  ConnectionNotFoundException as err:
+            print(f"{err=}, {type(err)=}")
     
     
     @classmethod
@@ -112,11 +116,11 @@ class LocalNodeLib:
         
         @decoTryConnection(iterator)
         async def func(distantAgentHost:str):
-            try:
-                return await KvStoreClient.notifyNewPred(distantAgentHost, newPredDesc)
-            except  ConnectionNotFoundException as err:
-                raise err
-        return await func(newPredDesc)
+            return await KvStoreClient.notifyNewPred(distantAgentHost, newPredDesc)
+        try:
+            return await func(newPredDesc)
+        except  ConnectionNotFoundException as err:
+            print(f"{err=}, {type(err)=}")
     
     
     

@@ -36,7 +36,7 @@ def decoTryConnection(nodeIterator:NodeIteratorOverAgents,
                         try:
                             return await func(*args, distantAgentHost=addr, **kwargs)
                         except grpc.RpcError as err:
-                            print(f"{err=}, {type(err)=}")
+                            # print(f"{err=}, {type(err)=}")
                             count += 1
                 raise ConnectionNotFoundException("to change")
             else :
@@ -50,7 +50,7 @@ def decoTryConnection(nodeIterator:NodeIteratorOverAgents,
                             try:
                                 return await func(*args, distantAgentHost=addr, **kwargs)
                             except grpc.RpcError as err:
-                                print(f"{err=}, {type(err)=}")
+                                # print(f"{err=}, {type(err)=}")
                                 count += 1
                         ext_count += 1
                     else:

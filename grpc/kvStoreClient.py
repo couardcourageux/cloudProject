@@ -13,7 +13,7 @@ class KvStoreClient():
         async with aio.insecure_channel(distantAgentHost) as ch:
             stub = protocol_pb2_grpc.KvStoreStub(ch)
             req = protocol_pb2.VoidMsg()
-            await stub.obtainId(req, timeout=5)
+            await stub.ping(req, timeout=5)
             return 
         
     

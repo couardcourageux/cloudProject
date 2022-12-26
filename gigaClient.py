@@ -8,7 +8,7 @@ sys.path.append(os.path.join(LOCAL_DIRECTORY, "dht"))
 sys.path.append(os.path.join(LOCAL_DIRECTORY, "nodesAgent"))
 
 
-PORT = 5007
+PORT = 5006
 
 from server import serve
 import asyncio

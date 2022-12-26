@@ -65,6 +65,9 @@ async def main():
     print('mapping')
     await map_network(wrappers, mainWrapper)
     print('mapped')
+    
+    # print(await wrappers[mainWrapper]._is_alive())
+    
 
     wrappers, mainWrapper = await terminate_network(wrappers, mainWrapper)
 asyncio.run(main())
