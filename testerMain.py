@@ -51,7 +51,7 @@ async def map_network(wrappers, mainWrapper):
     # print(network)
     net, errs = validateNetwork(network)
     # printListe(net, "network")
-    printListe(errs, "errors")
+    # printListe(errs, "errors")
     print("---------------------------\n")
     print(json.dumps(network, indent=4))
     
@@ -69,7 +69,7 @@ async def main():
     # print(await wrappers[mainWrapper]._is_alive())
     
 
-    # wrappers, mainWrapper = await terminate_network(wrappers, mainWrapper)
+    wrappers, mainWrapper = await terminate_network(wrappers, mainWrapper)
 asyncio.run(main())
 
 
