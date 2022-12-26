@@ -1,8 +1,23 @@
-from threadWrapper import ThreadWrapper, killMultiple
+from threadWrapper import ThreadWrapper, killMultiple,mapNetwork,validateNetwork
 import asyncio
+import json
 
 
-def init_network(wrappers, mainWrapper, n):
+import os, sys
+
+LOCAL_DIRECTORY = os.getcwd()
+
+sys.path.append(os.path.join(LOCAL_DIRECTORY, "grpc"))
+
+def printListe(liste, title):
+    print(f"---------------------------\n{title}\n")
+    for el in liste:
+        print(el)
+        print("\n")
+    
+        
+
+async def init_network(wrappers, mainWrapper, n):
     mainProc = ThreadWrapper(5005, None)
     mainWrapper = mainProc.id
     wrappers[mainWrapper] = mainProc
@@ -15,6 +30,7 @@ def init_network(wrappers, mainWrapper, n):
     
     for k, w in wrappers.items():
         if k != mainWrapper:
+            await asyncio.sleep(1)
             w.run()
             
     return wrappers, mainWrapper
@@ -30,21 +46,30 @@ async def terminate_network(wrappers, mainWrapper):
     return wrappers, mainWrapper
 
 
+async def map_network(wrappers, mainWrapper):
+    network = await mapNetwork(wrappers, mainWrapper)
+    # print(network)
+    # net, errs = validateNetwork(network)
+    # printListe(net, "network")
+    # printListe(errs, "errors")
+    # print("---------------------------\n")
+    print(json.dumps(network, indent=4))
+    
+
+
 
 async def main():
-    wrappers, mainWrapper = init_network({}, "", 2)
-            
-    await asyncio.sleep(3)
+    wrappers, mainWrapper = await init_network({}, "", 2)
+    
+    await asyncio.sleep(5) # delai pour que le réseau soit bien lancé
+    print('mapping')
+    await map_network(wrappers, mainWrapper)
+    print('mapped')
+
     wrappers, mainWrapper = await terminate_network(wrappers, mainWrapper)
 asyncio.run(main())
 
-# clientProc = ThreadWrapper(5006, mainProc.address())
-# mainProc.run()
-# clientProc.run()
 
 
-# mainProc = ThreadWrapper(5005, None)
-# mainProc.run()
 
-# clientProc = ThreadWrapper(5006, "localhost:5005")
-# clientProc.run()
+

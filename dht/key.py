@@ -50,12 +50,16 @@ class HashKey:
                     "closest_pred_known":keys[0],
                     "closest_succ_known":keys[0], 
                 }
-        for i in range(-1, len(keys) - 1):
+        for i in range(len(keys) - 1):
             if self.is_between_r_inclus(keys[i], keys[i+1]):
                 return {
                     "closest_pred_known":keys[i],
                     "closest_succ_known":keys[i+1], 
                 }
+        return {
+            "closest_pred_known":keys[-1],
+            "closest_succ_known":keys[0], 
+        }
     
     
     def setValue(self, value: str, hashValue:str) -> None:

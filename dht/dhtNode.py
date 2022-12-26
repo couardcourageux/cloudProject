@@ -16,6 +16,8 @@ from localNodeLib import LocalNodeLib
 from distantNodeLib import DistantNodeLib
 
 
+import json
+
 class DhtHolder:
     dhtNodes = {}
     localNodeHashVal = ""
@@ -92,11 +94,17 @@ class DhtNode:
         :param  hashKey 
         :return dict : _description_ of the responsible DhtNode
         """
+        # for c, v in DhtHolder.dhtNodes.items():
+        #     if c != DhtHolder.localNodeHashVal:
+        #         print(json.dumps(exportDhtNodeDescriptor(v), indent=4))
+                
+                
         if self.local:
             id_val = HashKey.getHashKeyClean(hashKey)
             intervals = [self._predecessor, self.id] + list(filter(lambda x: isinstance(x, HashKey),self._finger))
             guardians = id_val.findClosestsGuardians(intervals)
-            
+            # print("intervals\n", intervals)
+            # print("guardians\n", guardians)
             if guardians["closest_succ_known"] == self.id:
                 dhtNodeData = exportDhtNodeDescriptor(self)
                 if withNeighbors:
@@ -178,7 +186,6 @@ class DhtNode:
         
         if bootstrap_addr:
             res = await KvStoreClient.getUpdatedDhtDescriptor(bootstrap_addr)
-            
             logicalNode = res["LogicalNode"]
             bootStrapRemote = SimpleRemote(logicalNode)        
             succDesc = await bootStrapRemote.findSuccessor(localHashKey.hashValue)
@@ -273,6 +280,7 @@ class DhtNode:
             distantNodeHashVal = importDhtNodeDescriptor(callingNodeDescriptorFull)
             self._successor = HashKey(distantNodeHashVal, True)
             self._finger[0] = HashKey(distantNodeHashVal, True)
+            # print("successor updated by ", distantNodeHashVal, "\n", json.dumps(exportDhtNodeDescriptor(self)["dhtNodeData"], indent=4))
             return
         else:
             remote = Node.get(self.id.hashValue)               
@@ -284,6 +292,8 @@ class DhtNode:
         if self.local:
             distantNodeHashVal = importDhtNodeDescriptor(callingNodeDescriptorFull)
             self._predecessor = HashKey(distantNodeHashVal, True)
+            # print("predecessor updatedby ", distantNodeHashVal, "\n", json.dumps(exportDhtNodeDescriptor(self)["dhtNodeData"], indent=4))
+
             return
         else:
             remote = Node.get(self.id.hashValue)               

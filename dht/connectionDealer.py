@@ -31,6 +31,7 @@ def decoTryConnection(nodeIterator:NodeIteratorOverAgents,
                 while nodeIterator.hasNext():
                     addr = nodeIterator.getNext().getAddr()
                     count = 0
+                    # print(addr)
                     while count < per_addr:
                         try:
                             return await func(*args, distantAgentHost=addr, **kwargs)
@@ -45,6 +46,7 @@ def decoTryConnection(nodeIterator:NodeIteratorOverAgents,
                         addr = nodeIterator.getNext().getAddr()
                         count = 0
                         while count < per_addr:
+                            # print(addr)
                             try:
                                 return await func(*args, distantAgentHost=addr, **kwargs)
                             except grpc.RpcError as err:

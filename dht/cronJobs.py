@@ -41,4 +41,5 @@ async def updateMyNeighbors():
 
 
 async def serveCronJobs():
-    await asyncio.gather(stabilize(), checkPred(), updateMyPointers(), updateMyNeighbors())
+    # await asyncio.gather(stabilize(), checkPred(), updateMyPointers(), updateMyNeighbors())
+    pass
