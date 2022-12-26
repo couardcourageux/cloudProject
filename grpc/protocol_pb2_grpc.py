@@ -54,6 +54,16 @@ class KvStoreStub(object):
                 request_serializer=protocol__pb2.PayloadMsg.SerializeToString,
                 response_deserializer=protocol__pb2.VoidMsg.FromString,
                 )
+        self.notifyNewPred = channel.unary_unary(
+                '/KVStore.KvStore/notifyNewPred',
+                request_serializer=protocol__pb2.PayloadMsg.SerializeToString,
+                response_deserializer=protocol__pb2.VoidMsg.FromString,
+                )
+        self.plzDie = channel.unary_unary(
+                '/KVStore.KvStore/plzDie',
+                request_serializer=protocol__pb2.VoidMsg.SerializeToString,
+                response_deserializer=protocol__pb2.VoidMsg.FromString,
+                )
 
 
 class KvStoreServicer(object):
@@ -107,6 +117,18 @@ class KvStoreServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def notifyNewPred(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def plzDie(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_KvStoreServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -148,6 +170,16 @@ def add_KvStoreServicer_to_server(servicer, server):
             'updatePredecessor': grpc.unary_unary_rpc_method_handler(
                     servicer.updatePredecessor,
                     request_deserializer=protocol__pb2.PayloadMsg.FromString,
+                    response_serializer=protocol__pb2.VoidMsg.SerializeToString,
+            ),
+            'notifyNewPred': grpc.unary_unary_rpc_method_handler(
+                    servicer.notifyNewPred,
+                    request_deserializer=protocol__pb2.PayloadMsg.FromString,
+                    response_serializer=protocol__pb2.VoidMsg.SerializeToString,
+            ),
+            'plzDie': grpc.unary_unary_rpc_method_handler(
+                    servicer.plzDie,
+                    request_deserializer=protocol__pb2.VoidMsg.FromString,
                     response_serializer=protocol__pb2.VoidMsg.SerializeToString,
             ),
     }
@@ -292,6 +324,40 @@ class KvStore(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/KVStore.KvStore/updatePredecessor',
             protocol__pb2.PayloadMsg.SerializeToString,
+            protocol__pb2.VoidMsg.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def notifyNewPred(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/KVStore.KvStore/notifyNewPred',
+            protocol__pb2.PayloadMsg.SerializeToString,
+            protocol__pb2.VoidMsg.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def plzDie(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/KVStore.KvStore/plzDie',
+            protocol__pb2.VoidMsg.SerializeToString,
             protocol__pb2.VoidMsg.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

@@ -4,7 +4,7 @@ import protocol_pb2_grpc
 from kvStoreServicer import KvStoreServicer
 
 import asyncio
-import signal
+from signalHandler import SignalHandler
 
 
 
@@ -12,26 +12,18 @@ import signal
 class KeepAlive:
     keepAlive = True
     
-    @classmethod
-    def exit_gracefully(self):
-        KeepAlive.keepAlive = False
+    # @classmethod
+    # def exit_gracefully(self):
+    #     KeepAlive.keepAlive = False
         
     @classmethod
     async def checkMustKeepAlive(self, server):
-        while KeepAlive.keepAlive:
+        while SignalHandler.KEEP_PROCESSING:
             await asyncio.sleep(2)
         await server.stop(grace=2)
         
         
-class SignalHandler:
-    KEEP_PROCESSING = True
-    signal.signal(signal.SIGINT, KeepAlive.exit_gracefully)
-    signal.signal(signal.SIGTERM, KeepAlive.exit_gracefully)
-    
-    @classmethod
-    async def stopGrpcServer(self, time=0):
-        await asyncio.sleep(time)
-        KeepAlive.exit_gracefully()
+
 
     
 async def serving(portToServe:str, server):                                                       
@@ -39,11 +31,10 @@ async def serving(portToServe:str, server):
     listen_addr = 'localhost:{}'.format(portToServe)                                                  
     server.add_insecure_port(listen_addr)                                       
     # logging.info("Starting server on %s", listen_addr)   
-    print("Starting server on %s", listen_addr)                       
-    await server.start()     
-    print("server started")                                                   
+    print("Starting server on ", listen_addr)                       
+    await server.start()                                                       
     await server.wait_for_termination()
-    print("server stopped mdr")
+    print("server stopped on ", listen_addr)
     
 
 async def serve(portToServe:str):

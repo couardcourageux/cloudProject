@@ -49,14 +49,5 @@ if __name__ == "__main__":
     
     async def runTest():
         res = await dhtNode.find_successor(localHashKey, True)
-        # for c, v in res.items():
-        #     print(c, v)
-        # print()
-        # res = await dhtNode.find_successor(localHashKey)
-        # for c, v in res.items():
-        #     print(c, v)
-
-    # asyncio.run(runTest())    
-    # print(DhtNode.getLocal())
     asyncio.run(serve(5005))
     

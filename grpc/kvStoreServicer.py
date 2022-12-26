@@ -8,6 +8,7 @@ import protocol_pb2
 import protocol_pb2_grpc
 import asyncio
 import json
+from signalHandler import SignalHandler
 
 
 from dhtNode import DhtNode
@@ -67,13 +68,24 @@ class KvStoreServicer(protocol_pb2_grpc.KvStoreServicer):
     async def updatePredecessor(self, request, context):
         localDhtNode = DhtNode.getLocal()
         reqData = json.loads(request.jsonData)
-        repData = await localDhtNode.update_predecessor(
+        await localDhtNode.update_predecessor(
             reqData["callingNodeDescriptorFull"]
         )
         await localDhtNode.update_successor(
             reqData["callingNodeDescriptorFull"]
         )
         return protocol_pb2.VoidMsg()
+    
+    async def notifyNewPred(self, request, context):
+        reqData = json.loads(request.jsonData)
+        localDhtNode = DhtNode.getLocal()
+        await localDhtNode.notify_new_pred(reqData["newPredDescFull"])
+        return protocol_pb2.VoidMsg()
+    
+    async def plzDie(self, request, context):
+        await SignalHandler.stopGrpcServer()
+        return protocol_pb2.VoidMsg()
+        
         
         
         

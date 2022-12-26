@@ -12,7 +12,8 @@ service KvStore {
     rpc updateFingerTable(PayloadMsg) returns (VoidMsg) {}
     rpc updateSuccessor(PayloadMsg) returns (VoidMsg) {}
     rpc updatePredecessor(PayloadMsg) returns (VoidMsg) {}
-
+    rpc notifyNewPred(PayloadMsg) returns (VoidMsg) {}
+    rpc plzDie(VoidMsg) returns (VoidMsg) {}
 
 }
 

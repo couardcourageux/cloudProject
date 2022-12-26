@@ -106,3 +106,17 @@ class LocalNodeLib:
         return await func()
     
     
+    @classmethod
+    async def notify_new_predecessor(self, newPredDesc:dict, node):
+        iterator = node.getAgentsIterator()
+        
+        @decoTryConnection(iterator)
+        async def func(distantAgentHost:str):
+            try:
+                return await KvStoreClient.notifyNewPred(distantAgentHost, newPredDesc)
+            except  ConnectionNotFoundException as err:
+                raise err
+        return await func(newPredDesc)
+    
+    
+    

@@ -100,5 +100,23 @@ class KvStoreClient():
         async with aio.insecure_channel(distantAgentHost) as ch:
             stub = protocol_pb2_grpc.KvStoreStub(ch)
             await stub.updatePredecessor(req)
+            
+    @classmethod
+    async def notifyNewPred(self, distantAgentHost:str, newPredDescFull:dict):
+        req = protocol_pb2.PayloadMsg()
+        req.respStatus = 0
+        req.jsonData = json.dumps({
+            "newPredDescFull":newPredDescFull
+        })
+        
+        async with aio.insecure_channel(distantAgentHost) as ch:
+            stub = protocol_pb2_grpc.KvStoreStub(ch)
+            await stub.notifyNewPred(req)
+            
+    @classmethod
+    async def plzDie(self, distantAgentHost:str):
+        async with aio.insecure_channel(distantAgentHost) as ch:
+            stub = protocol_pb2_grpc.KvStoreStub(ch)
+            await stub.plzDie(protocol_pb2.VoidMsg())
 
             

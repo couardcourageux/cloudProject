@@ -1,5 +1,7 @@
 import os, sys
 
+from kvStoreClient import KvStoreClient
+
 LOCAL_DIRECTORY = os.getcwd()
 
 sys.path.append(os.path.join(LOCAL_DIRECTORY, "nodesAgent"))
@@ -115,12 +117,10 @@ class DhtNode:
                     dhtNodeData["succDhtNode"] = self.find_successor(DhtNode.get(self._successor)._successor)
                 return dhtNodeData
             else:
-                print("else")
                 remote = DhtNode.get(guardians["closest_pred_known"])
                 return await remote.find_successor(id_val, withNeighbors)
         
         else:
-            print("remote call")
             remote = Node.get(self.id.hashValue)
             if isinstance(hashKey, HashKey):
                 searched = hashKey.hashValue
@@ -149,11 +149,80 @@ class DhtNode:
     def init_successor_list(self, successor_hash_id:str):
         pass
     
-    def join(self, node_id:str, node_addr:str, bootstrap_addr:str):
-        pass
+    async def join(self, localAddr:str, localPort:str, bootstrap_addr:str):
+        localHashKey = self.id
+        self.local = True
+        self._predecessor = localHashKey
+        self._successor = localHashKey
+        self._finger = [None for i in range(256)]
+        self._finger[0] = localHashKey
+        
+        
+        
+        DhtNode.register(self)
+        self.setLocal()
+        
+    
+        
+        localNode = Node(localHashKey.hashValue)
+        Node.register(localNode)
+        
+        localAgent = Agent(
+            HashKey.getRandom().value,
+            localAddr,
+            localPort,
+            0
+        )
+        Agent.register(localAgent)
+        localNode.addAgent(localAgent.id)
+        
+        if bootstrap_addr:
+            res = await KvStoreClient.getUpdatedDhtDescriptor(bootstrap_addr)
+            
+            logicalNode = res["LogicalNode"]
+            bootStrapRemote = SimpleRemote(logicalNode)        
+            succDesc = await bootStrapRemote.findSuccessor(localHashKey.hashValue)
+        
+            succ = importDhtNodeDescriptor(succDesc)
+            dhtPredOfSuccDesc = await bootStrapRemote.findSuccessor( DhtNode.get(succ)._predecessor.hashValue)
+            pred = importDhtNodeDescriptor(dhtPredOfSuccDesc)
+
+            self._successor = DhtNode.get(succ).id
+            self._finger[0] = DhtNode.get(succ).id
+            self._predecessor = DhtNode.get(pred).id      
+            
+            
+            await self.update_neighbors()        
+            await self.udpate_local_image(self._predecessor)  
+            await self.udpate_local_image(self._successor)
+        
     
     def stabilize(self):
-        pass
+        if self.local:
+            mySucc = DhtNode.get(self._successor)
+            node_interDesc = self.find_successor(mySucc._predecessor)
+            if node_interDesc:
+                if mySucc._predecessor == self.id:
+                    return
+                if self.id == self._successor \
+                    or HashKey(node_interDesc["dhtNodeData"]["id"]).is_inside(self.id, self._successor):
+                    node_inter = importDhtNodeDescriptor(node_interDesc)
+                    self._successor = node_inter.id
+            if self._successor != self.id:
+                mySucc.notify_new_pred(exportDhtNodeDescriptor(self))
+
+    
+    async def notify_new_pred(self, newPredDescFull:dict):
+        if self.local:
+            newPred = DhtNode.get(importDhtNodeDescriptor(newPredDescFull))
+            if not self._predecessor \
+                or newPred.id.is_inside(self._predecessor, self.id):
+                    self._predecessor = newPred.id
+
+        else:
+            remote = Node.get(self.id.hashValue)
+            await LocalNodeLib.notify_new_predecessor(newPredDescFull, remote)
+
 
     async def update_neighbors(self):
         if self.local:
@@ -166,10 +235,8 @@ class DhtNode:
     @classmethod
     async def udpate_local_image(self, hashKey:HashKey):
         dhtNode = DhtNode.get(hashKey)
-        # print(exportDhtNodeDescriptor(dhtNode))
         if not dhtNode.local:
             result = await dhtNode.getUpdatedDescriptor()
-            
             importDhtNodeDescriptor(result)
             
     
@@ -234,17 +301,15 @@ class SimpleRemote:
         self.logicalNode = Node.get(Node.importFromDict(logicalNodeDescriptor))
         
     async def findSuccessor(self, hashKey:str):
-        print(hashKey)
-        truc = await LocalNodeLib.find_successor(hashKey, self.logicalNode)
-        print(truc)
-        return truc
+ 
+        return await LocalNodeLib.find_successor(hashKey, self.logicalNode)
         
     async def _update_finger_table(self, callingNodeDescriptorFull:dict, i:int) -> None:
-        # rpc call to agents of _update_finger_table
+        await LocalNodeLib.updateFingerTable(callingNodeDescriptorFull, i, self.logicalNode)
         pass
     
     async def check_predecessor(self):
-        await LocalNodeLib.make_check_predecessor(self.logicalNode)        
+        await LocalNodeLib.make_check_predecessor(DhtNode.get(self._predecessor))        
         
     def close(self):
         Node.unlist(self.logicalNode.id)
