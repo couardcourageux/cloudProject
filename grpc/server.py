@@ -5,7 +5,7 @@ from kvStoreServicer import KvStoreServicer
 
 import asyncio
 from signalHandler import SignalHandler
-
+from cronJobs import serveCronJobs
 
 
 
@@ -39,5 +39,5 @@ async def serving(portToServe:str, server):
 
 async def serve(portToServe:str):
     server = aio.server()
-    await asyncio.gather(serving(portToServe, server), KeepAlive.checkMustKeepAlive(server))
+    await asyncio.gather(serving(portToServe, server), KeepAlive.checkMustKeepAlive(server), serveCronJobs())
     

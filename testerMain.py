@@ -30,7 +30,7 @@ async def init_network(wrappers, mainWrapper, n):
     
     for k, w in wrappers.items():
         if k != mainWrapper:
-            await asyncio.sleep(1)
+            await asyncio.sleep(2)
             w.run()
             
     return wrappers, mainWrapper
@@ -49,19 +49,19 @@ async def terminate_network(wrappers, mainWrapper):
 async def map_network(wrappers, mainWrapper):
     network = await mapNetwork(wrappers, mainWrapper)
     # print(network)
-    # net, errs = validateNetwork(network)
+    net, errs = validateNetwork(network)
     # printListe(net, "network")
-    # printListe(errs, "errors")
-    # print("---------------------------\n")
+    printListe(errs, "errors")
+    print("---------------------------\n")
     print(json.dumps(network, indent=4))
     
 
 
 
 async def main():
-    wrappers, mainWrapper = await init_network({}, "", 2)
+    wrappers, mainWrapper = await init_network({}, "", 15)
     
-    await asyncio.sleep(5) # delai pour que le réseau soit bien lancé
+    await asyncio.sleep(8) # delai pour que le réseau soit bien lancé
     print('mapping')
     await map_network(wrappers, mainWrapper)
     print('mapped')
@@ -69,7 +69,7 @@ async def main():
     # print(await wrappers[mainWrapper]._is_alive())
     
 
-    wrappers, mainWrapper = await terminate_network(wrappers, mainWrapper)
+    # wrappers, mainWrapper = await terminate_network(wrappers, mainWrapper)
 asyncio.run(main())
 
 

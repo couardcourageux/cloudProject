@@ -8,7 +8,7 @@ sys.path.append(os.path.join(LOCAL_DIRECTORY, "grpc"))
 
 from dhtNode import DhtNode
 from signalHandler import SignalHandler
-
+from consistency import ensure_consistency
 import asyncio
 
 
@@ -40,6 +40,13 @@ async def updateMyNeighbors():
         await localNode.update_neighbors()
 
 
+async def consistencyLoop():
+    while SignalHandler.running():
+        await asyncio.sleep(10)
+        localNode = DhtNode.getLocal()
+        await ensure_consistency(localNode)
+
 async def serveCronJobs():
     # await asyncio.gather(stabilize(), checkPred(), updateMyPointers(), updateMyNeighbors())
-    pass
+    await asyncio.sleep(5)
+    await consistencyLoop()

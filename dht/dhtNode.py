@@ -142,14 +142,6 @@ class DhtNode:
             return await LocalNodeLib.find_successor(searched, remote, withNeighbors)
 
     
-    def _fix_finger(self, finger_id:str):
-        remoteNode = DhtNode.get(self._finger[finger_id])
-        # await ping
-        ping_resp = True
-        if ping_resp:
-            # await description
-            pass
-    
     def generate_key(self):
         if self.local:
             self.id = HashKey.getRandom()
@@ -169,6 +161,8 @@ class DhtNode:
                 newFarthestDescriptor = self.find_successor(farthest._successor)
                 tempo_backup.append(importDhtNodeDescriptor(newFarthestDescriptor))
                 farthest = DhtNode.get(tempo_backup[-1])
+                if farthest == None:
+                    break
             self._backupSuccessors = tempo_backup[:]
         
     
@@ -212,12 +206,17 @@ class DhtNode:
             await self.update_neighbors()        
             await self.udpate_local_image(self._predecessor)  
             await self.udpate_local_image(self._successor)
+            # print(json.dumps({
+            #     "id":self.id.hashValue,
+            #     "pred":self._predecessor.hashValue,
+            #     "succ":self._successor.hashValue
+            # }))
         
     
-    def stabilize(self):
+    async def stabilize(self):
         if self.local:
             mySucc = DhtNode.get(self._successor)
-            node_interDesc = self.find_successor(mySucc._predecessor)
+            node_interDesc = await self.find_successor(mySucc._predecessor)
             if node_interDesc:
                 if mySucc._predecessor == self.id:
                     return
@@ -226,7 +225,7 @@ class DhtNode:
                     node_inter = importDhtNodeDescriptor(node_interDesc)
                     self._successor = node_inter.id
             if self._successor != self.id:
-                mySucc.notify_new_pred(exportDhtNodeDescriptor(self))
+                await mySucc.notify_new_pred(exportDhtNodeDescriptor(self))
 
     
     async def notify_new_pred(self, newPredDescFull:dict):
@@ -280,7 +279,6 @@ class DhtNode:
             Node.unlist(self._finger[i].hashValue)
             self._finger[i] = distantDhtNode.id
         else:
-            
             remote = Node.get(self.id.hashValue)
             await LocalNodeLib.updateFingerTable(callingNodeDescriptorFull, i, remote)
                     
@@ -290,6 +288,11 @@ class DhtNode:
             distantNodeHashVal = importDhtNodeDescriptor(callingNodeDescriptorFull)
             self._successor = HashKey(distantNodeHashVal, True)
             self._finger[0] = HashKey(distantNodeHashVal, True)
+            # print(json.dumps({
+            #     "id":self.id.hashValue,
+            #     "pred":self._predecessor.hashValue,
+            #     "succ":self._successor.hashValue
+            # }))
             # print("successor updated by ", distantNodeHashVal, "\n", json.dumps(exportDhtNodeDescriptor(self)["dhtNodeData"], indent=4))
             return
         else:
@@ -303,7 +306,11 @@ class DhtNode:
             distantNodeHashVal = importDhtNodeDescriptor(callingNodeDescriptorFull)
             self._predecessor = HashKey(distantNodeHashVal, True)
             # print("predecessor updatedby ", distantNodeHashVal, "\n", json.dumps(exportDhtNodeDescriptor(self)["dhtNodeData"], indent=4))
-
+            # print(json.dumps({
+            #     "id":self.id.hashValue,
+            #     "pred":self._predecessor.hashValue,
+            #     "succ":self._successor.hashValue
+            # }))
             return
         else:
             remote = Node.get(self.id.hashValue)               
@@ -312,6 +319,7 @@ class DhtNode:
 
     def update_successor_list(self):
         pass
+    
 
 
 

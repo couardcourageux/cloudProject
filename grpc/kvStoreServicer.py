@@ -28,7 +28,7 @@ class KvStoreServicer(protocol_pb2_grpc.KvStoreServicer):
     async def findSuccessor(self, request, context):
         localDhtNode = DhtNode.getLocal()
         reqData = json.loads(request.jsonData)
-        print("from distance")
+        print("")
         repData = await localDhtNode.find_successor(reqData["hashValue"], reqData["withNeighbors"])
         resp = protocol_pb2.PayloadMsg()
         resp.respStatus = 0
